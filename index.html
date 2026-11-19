@@ -89,13 +89,11 @@
 <!-- EmailJS SDK & Direct Email Integration Setup -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
-  // EmailJS Configuration (Optional):
-  // To receive contact enquiries directly via EmailJS, sign up at https://www.emailjs.com/
-  // and set your keys below:
   window.EMAILJS_CONFIG = {
-    serviceId: '',  // e.g. 'service_xxxxxxx'
-    templateId: '', // e.g. 'template_xxxxxxx'
-    publicKey: ''   // e.g. 'user_xxxxxxxxxxxx'
+    serviceId: 'service_pc38z03',
+    companyTemplateId: 'template_3hec9nf',
+    customerTemplateId: 'template_entmrn5',
+    publicKey: 'WMzTDRdrfQgewyvmD'
   };
   if (window.emailjs && window.EMAILJS_CONFIG && window.EMAILJS_CONFIG.publicKey) {
     window.emailjs.init(window.EMAILJS_CONFIG.publicKey);

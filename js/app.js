@@ -85,9 +85,10 @@ instagram:'apexora.tech2k',
 location:'Chennai, Tamil Nadu',
 mapUrl:'https://www.google.com/maps/search/?api=1&query=Chennai%2C+Tamil+Nadu',
 emailjs:{
-serviceId:'',  // e.g. 'service_xxxxxxx'
-templateId:'', // e.g. 'template_xxxxxxx'
-publicKey:''   // e.g. 'user_xxxxxxxxxxxx'
+serviceId:'service_pc38z03',
+companyTemplateId:'template_3hec9nf',
+customerTemplateId:'template_entmrn5',
+publicKey:'WMzTDRdrfQgewyvmD'
 }
 };
 const OFFICIALS=[ /* order = display order. g:'m' = first row, g:'f' = second row */
@@ -342,9 +343,9 @@ const M={name:'Enter your full name.',email:'Enter a valid email address.',phone
 let ok=true;for(const k in R){f[k].nextElementSibling.textContent=R[k]?'':M[k];if(!R[k]&&ok){f[k].focus();ok=false}}
 if(!ok)return;const fm=$('#fm'),btn=f.querySelector('button[type="submit"]');
 const ecf=(window.EMAILJS_CONFIG&&window.EMAILJS_CONFIG.publicKey)?window.EMAILJS_CONFIG:(CONFIG.emailjs||{});
-if(!ecf.serviceId||!ecf.templateId||!ecf.publicKey){
+if(!ecf.serviceId||!ecf.companyTemplateId||!ecf.customerTemplateId||!ecf.publicKey){
 fm.style.color='var(--ac2)';
-fm.innerHTML='<div style="margin-top:12px;padding:12px;border:1px solid var(--ac2);border-radius:10px;background:rgba(214,0,25,0.06);font-size:13px;line-height:1.5"><b>EmailJS is not configured yet.</b><br>Please set your <code>serviceId</code>, <code>templateId</code>, and <code>publicKey</code> in <code>js/app.js</code> or <code>index.html</code> to receive submissions.</div>';
+fm.innerHTML='<div style="margin-top:12px;padding:12px;border:1px solid var(--ac2);border-radius:10px;background:rgba(214,0,25,0.06);font-size:13px;line-height:1.5"><b>EmailJS is not fully configured.</b><br>Please check your EmailJS serviceId, companyTemplateId, customerTemplateId, and publicKey.</div>';
 return;
 }
 if(!window.emailjs){
@@ -353,25 +354,34 @@ fm.textContent='EmailJS SDK could not be loaded. Please check your internet conn
 return;
 }
 btn.disabled=true;const origText=btn.textContent;btn.textContent='Sending Enquiry...';
-fm.style.color='var(--tx2)';fm.textContent='Sending your enquiry directly to APEXORA.TECH...';
+fm.style.color='var(--tx2)';fm.textContent='Sending your enquiry and confirmation emails...';
 try{
-await emailjs.send(ecf.serviceId,ecf.templateId,{
+const templateParams={
+customer_name:v('name'),
+customer_email:v('email'),
+customer_phone:v('phone'),
+service_required:v('service'),
+project_description:v('desc'),
 from_name:v('name'),
 from_email:v('email'),
 reply_to:v('email'),
 phone:v('phone'),
 service:v('service'),
 message:v('desc'),
-to_email:CONFIG.email||'apexora.technology@gmail.com',
+to_email:v('email'),
 to_name:'APEXORA.TECH'
-},ecf.publicKey);
+};
+await Promise.all([
+emailjs.send(ecf.serviceId,ecf.companyTemplateId,templateParams,ecf.publicKey),
+emailjs.send(ecf.serviceId,ecf.customerTemplateId,templateParams,ecf.publicKey)
+]);
 fm.style.color='#10b981';
-fm.innerHTML=`<div style="margin-top:14px;padding:14px;border:1px solid #10b981;border-radius:10px;background:rgba(16,185,129,0.08);text-align:left"><b style="color:#10b981;font-size:15px;display:block;margin-bottom:4px">✓ Enquiry Sent Successfully!</b><span style="font-size:13px;color:var(--tx)">Thank you, <b>${esc(v('name'))}</b>. We have received your project enquiry for <b>${esc(v('service'))}</b> and will contact you shortly.</span></div>`;
+fm.innerHTML=`<div style="margin-top:14px;padding:14px;border:1px solid #10b981;border-radius:10px;background:rgba(16,185,129,0.08);text-align:left"><b style="color:#10b981;font-size:15px;display:block;margin-bottom:4px">✓ Project Enquiry Sent Successfully!</b><span style="font-size:13px;color:var(--tx)">Thank you, <b>${esc(v('name'))}</b>! We have received your project inquiry for <b>${esc(v('service'))}</b>. A confirmation email has been sent to <b>${esc(v('email'))}</b>, and our team will get back to you shortly.</span></div>`;
 f.reset();btn.textContent='Enquiry Sent';
 }catch(err){
 console.error('EmailJS error:',err);
 fm.style.color='var(--ac2)';
-fm.innerHTML=`<div style="margin-top:12px;padding:12px;border:1px solid var(--ac2);border-radius:10px;background:rgba(214,0,25,0.06);font-size:13px"><b>Failed to send enquiry.</b> ${esc(err?.text||err?.message||'Please check your EmailJS settings or try again.')}</div>`;
+fm.innerHTML=`<div style="margin-top:12px;padding:12px;border:1px solid var(--ac2);border-radius:10px;background:rgba(214,0,25,0.06);font-size:13px"><b>Failed to send enquiry.</b> ${esc(err?.text||err?.message||'Please check your network or try again.')}</div>`;
 btn.disabled=false;btn.textContent=origText;
 }
 }}

@@ -161,26 +161,29 @@ Once your code is pushed to GitHub, you can publish the website live on GitHub P
 
 ---
 
-## 📬 EmailJS Integration Setup
+## 📬 EmailJS Integration (Dual Email System)
 
-The **Start Project** section uses **EmailJS** exclusively for direct in-browser form submission to your inbox (without opening external mail apps or WhatsApp).
+The **Start Project** section uses **EmailJS** exclusively for direct in-browser form submission. When a customer submits an inquiry, **two separate emails are dispatched simultaneously**:
 
-### How to Activate EmailJS (in 2 minutes):
-1. Create a free account at [EmailJS](https://www.emailjs.com/).
-2. In the EmailJS dashboard:
-   - **Email Services:** Add your Gmail (`apexora.technology@gmail.com`) and copy the **Service ID** (e.g., `service_xxxxxxx`).
-   - **Email Templates:** Create a new template and copy the **Template ID** (e.g., `template_xxxxxxx`).
-     - Recommended template fields: `{{from_name}}`, `{{from_email}}`, `{{phone}}`, `{{service}}`, `{{message}}`.
-   - **Account / API Keys:** Copy your **Public Key** (e.g., `user_xxxxxxxxxxxx`).
-3. Add your keys either in `index.html` (lines 94–98) or in `js/app.js` (`CONFIG.emailjs`):
-   ```javascript
-   window.EMAILJS_CONFIG = {
-     serviceId: 'your_service_id',
-     templateId: 'your_template_id',
-     publicKey: 'your_public_key'
-   };
-   ```
-4. Now, whenever a visitor clicks "Submit Enquiry", their message is delivered directly to your inbox with instant on-screen confirmation!
+1. **Email 1 – Company Notification (`template_3hec9nf`):**  
+   Delivers the full project inquiry directly to APEXORA.TECH's inbox with customer details, phone number, service requested, and description.
+2. **Email 2 – Customer Confirmation (`template_entmrn5`):**  
+   Sends an immediate confirmation & thank-you email to the customer's email address confirming receipt of their project inquiry.
+
+### Configuration & Credentials
+* **Service ID:** `service_pc38z03`
+* **Company Notification Template:** `template_3hec9nf`
+* **Customer Confirmation Template:** `template_entmrn5`
+* **Public Key:** `WMzTDRdrfQgewyvmD`
+
+### Consistent Template Variables
+Both templates receive the following standardized template variables:
+* `{{customer_name}}` – Customer's full name
+* `{{customer_email}}` – Customer's email address
+* `{{customer_phone}}` – Customer's phone number
+* `{{service_required}}` – Selected service category
+* `{{project_description}}` – Project description entered by customer
+*(Also includes `from_name`, `from_email`, `reply_to`, `service`, `message` for backwards compatibility).*
 
 ---
 
