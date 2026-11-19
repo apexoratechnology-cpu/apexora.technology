@@ -1,3 +1,10 @@
+﻿# ==============================================================================
+# 👉 PASTE YOUR GITHUB REPOSITORY URL BETWEEN THE QUOTES BELOW:
+# Example: $GITHUB_REPO_URL = "https://github.com/your-username/apexora-tech.git"
+# ==============================================================================
+$GITHUB_REPO_URL = ""
+# ==============================================================================
+
 Write-Host "===================================================" -ForegroundColor Cyan
 Write-Host "         APEXORA.TECH - Push to GitHub" -ForegroundColor Cyan
 Write-Host "===================================================" -ForegroundColor Cyan
@@ -23,23 +30,39 @@ Write-Host "[*] Staging files..." -ForegroundColor Yellow
 git add .
 
 # Commit
-Write-Host "[*] Committing files..." -ForegroundColor Yellow
+Write-Host "[*] Checking commit status..." -ForegroundColor Yellow
 git commit -m "Deploy APEXORA.TECH official website" 2>$null
 
-# Check origin
-$origin = git remote get-url origin 2>$null
-if (-not $origin) {
-    Write-Host ""
-    Write-Host "No remote GitHub repository linked yet." -ForegroundColor Yellow
-    Write-Host "Please create a new repository on GitHub: https://github.com/new"
-    $repoUrl = Read-Host "Enter your GitHub Repository URL (e.g., https://github.com/username/repo.git)"
-    if ([string]::IsNullOrWhiteSpace($repoUrl)) {
-        Write-Host "[ERROR] No URL entered. Aborting." -ForegroundColor Red
-        Read-Host "Press Enter to exit"
-        exit 1
+# Check origin URL
+if ([string]::IsNullOrWhiteSpace($GITHUB_REPO_URL)) {
+    $origin = git remote get-url origin 2>$null
+    if (-not $origin) {
+        Write-Host ""
+        Write-Host "No remote GitHub repository linked yet." -ForegroundColor Yellow
+        Write-Host "Please create a new repository on GitHub: https://github.com/new"
+        $GITHUB_REPO_URL = Read-Host "Enter your GitHub Repository URL (e.g., https://github.com/username/repo.git)"
+        if ([string]::IsNullOrWhiteSpace($GITHUB_REPO_URL)) {
+            Write-Host "[ERROR] No URL entered. Aborting." -ForegroundColor Red
+            Read-Host "Press Enter to exit"
+            exit 1
+        }
     }
-    git remote add origin $repoUrl.Trim()
 }
+
+if (-not [string]::IsNullOrWhiteSpace($GITHUB_REPO_URL)) {
+    $origin = git remote get-url origin 2>$null
+    if ($origin) {
+        Write-Host "[*] Updating remote origin URL to: $GITHUB_REPO_URL" -ForegroundColor Yellow
+        git remote set-url origin $GITHUB_REPO_URL.Trim()
+    } else {
+        Write-Host "[*] Adding remote origin: $GITHUB_REPO_URL" -ForegroundColor Yellow
+        git remote add origin $GITHUB_REPO_URL.Trim()
+    }
+}
+
+Write-Host ""
+Write-Host "[*] Current Remote Origin:" -ForegroundColor Cyan
+git remote -v
 
 Write-Host ""
 Write-Host "[*] Pushing to GitHub (branch: main)..." -ForegroundColor Yellow
@@ -65,4 +88,3 @@ if ($LASTEXITCODE -eq 0) {
 
 Write-Host ""
 Read-Host "Press Enter to exit"
-
