@@ -2,10 +2,9 @@
 setlocal enabledelayedexpansion
 
 :: ==============================================================================
-:: 👉 PASTE YOUR GITHUB REPOSITORY URL BETWEEN THE QUOTES BELOW:
-:: Example: set "GITHUB_REPO_URL=https://github.com/your-username/apexora-tech.git"
+:: GITHUB REPOSITORY URL:
 :: ==============================================================================
-set "GITHUB_REPO_URL="
+set "GITHUB_REPO_URL=https://github.com/apexoratechnology-cpu/apexora.technology.git"
 :: ==============================================================================
 
 echo ===================================================
@@ -42,64 +41,72 @@ if %ERRORLEVEL% EQU 0 (
     echo [*] Working tree clean or changes already committed.
 )
 
-:: If GITHUB_REPO_URL was not pasted above, check if origin exists or prompt user
-if "%GITHUB_REPO_URL%"=="" (
-    git remote get-url origin >nul 2>nul
-    if %ERRORLEVEL% NEQ 0 (
-        echo.
-        echo -------------------------------------------------------------------
-        echo No GitHub URL specified in this file or configured in git.
-        echo Please create an empty repository on GitHub: https://github.com/new
-        echo -------------------------------------------------------------------
-        echo.
-        set /p GITHUB_REPO_URL="Enter your GitHub Repository URL (e.g. https://github.com/username/repo.git): "
-        if "!GITHUB_REPO_URL!"=="" (
-            echo.
-            echo [ERROR] No GitHub URL provided. Aborting.
-            pause
-            exit /b 1
-        )
-    )
-)
-
-:: Set or update remote origin
-if not "%GITHUB_REPO_URL%"=="" (
-    git remote get-url origin >nul 2>nul
-    if %ERRORLEVEL% EQU 0 (
-        echo [*] Updating remote origin URL to: %GITHUB_REPO_URL%
-        git remote set-url origin %GITHUB_REPO_URL%
-    ) else (
-        echo [*] Adding remote origin: %GITHUB_REPO_URL%
-        git remote add origin %GITHUB_REPO_URL%
-    )
-)
-
-echo.
-echo [*] Current Remote Origin:
-git remote -v
-echo.
-echo [*] Pushing code to GitHub (branch: main)...
-git push -u origin main
-
+:: Ensure remote origin is set
+git remote get-url origin >nul 2>nul
 if %ERRORLEVEL% EQU 0 (
-    echo.
-    echo ===================================================
-    echo [SUCCESS] Your code has been pushed to GitHub!
-    echo.
-    echo Next step: Enable GitHub Pages for free hosting:
-    echo 1. Go to your repository on GitHub.com
-    echo 2. Click Settings -^> Pages (in the left menu)
-    echo 3. Under Branch, select 'main' and '/ (root)'
-    echo 4. Click Save!
-    echo ===================================================
+    git remote set-url origin %GITHUB_REPO_URL%
 ) else (
-    echo.
-    echo [!] Push failed.
-    echo If your GitHub repo already contains an existing README or commit,
-    echo run this command to merge before pushing:
-    echo     git pull origin main --rebase
-    echo and then run this script again.
+    git remote add origin %GITHUB_REPO_URL%
 )
 
+echo.
+echo [*] Remote Origin: %GITHUB_REPO_URL%
+echo [*] Pushing code to GitHub (branch: main)...
+echo.
+
+git push -u origin main
+if %ERRORLEVEL% EQU 0 goto :success
+
+echo.
+echo -------------------------------------------------------------------
+echo [*] Standard push was rejected because the remote GitHub repo
+echo     already has an existing file (like a default README/License).
+echo [*] Synchronizing with remote (git pull --rebase)...
+echo -------------------------------------------------------------------
+echo.
+
+git pull origin main --rebase --allow-unrelated-histories
+if %ERRORLEVEL% EQU 0 (
+    echo [*] Rebase successful! Now pushing your website...
+    git push -u origin main
+    if !ERRORLEVEL! EQU 0 goto :success
+)
+
+echo.
+echo -------------------------------------------------------------------
+echo [*] Notice: Remote GitHub repository still has conflicting commits.
+echo [*] For a newly created website repository, a force push replaces
+echo     the blank template on GitHub with your complete website files.
+echo -------------------------------------------------------------------
+echo.
+set /p FORCE_CHOICE="Do you want to overwrite the remote GitHub repo with your website files? (Y/N): "
+if /i "!FORCE_CHOICE!"=="Y" (
+    echo.
+    echo [*] Force pushing website to GitHub...
+    git push -u origin main --force
+    if !ERRORLEVEL! EQU 0 goto :success
+)
+
+echo.
+echo [!] Push could not be completed automatically.
+echo Please check your GitHub permissions or credentials, or run:
+echo     git push -u origin main --force
+pause
+exit /b 1
+
+:success
+echo.
+echo ===================================================
+echo [SUCCESS] Your website is successfully pushed to GitHub!
+echo.
+echo Next step: Enable GitHub Pages for free live hosting:
+echo 1. Go to: https://github.com/apexoratechnology-cpu/apexora.technology/settings/pages
+echo 2. Under 'Build and deployment' -^> 'Branch':
+echo    Select 'main' and '/ (root)'
+echo 3. Click 'Save'!
+echo.
+echo Your website will be live in 1-2 minutes at:
+echo https://apexoratechnology-cpu.github.io/apexora.technology/
+echo ===================================================
 echo.
 pause
