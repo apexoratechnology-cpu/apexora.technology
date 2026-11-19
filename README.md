@@ -53,11 +53,10 @@ At **APEXORA.TECH**, we turn ideas into reality through the perfect combination 
 - **🎥 Adaptive Video Intro:** Plays a high-definition intro video (desktop 16:9 or mobile 9:16) with audio autoplay failsafe and one-click Skip button.
 - **🔎 Dynamic Project Details Modal:** Click on any service card to view complete project scope, prerequisites, technical flow, deliverables, and estimated timelines.
 - **⭐ Customer Reviews Section:** Pre-populated with genuine 5-star customer ratings across software, IoT, design, and gifting. Includes an interactive review form where new visitor reviews are saved locally and displayed immediately.
-- **📬 Multi-Channel Enquiry System:**
-  - Opens visitor's default email client (`mailto:`) with pre-filled details.
-  - One-click **Gmail Web** direct composer link.
-  - One-click **WhatsApp Direct Chat** link to send enquiry directly to company WhatsApp.
-  - Optional **EmailJS** direct browser-to-inbox integration support.
+- **📬 EmailJS Direct Enquiry System:**
+  - The "Start Project" modal submits project requests directly via **EmailJS** from the browser into your inbox.
+  - No external mail clients, popups, or WhatsApp redirects are required.
+  - Includes real-time form validation, loading states, and instant success confirmation.
 - **🤝 ZENVIX Showcase:** Interactive product preview modal with image carousel for keychains, 3D statues, and resin frames.
 
 ---
@@ -162,31 +161,26 @@ Once your code is pushed to GitHub, you can publish the website live on GitHub P
 
 ---
 
-## 📬 Email & Contact System
+## 📬 EmailJS Integration Setup
 
-The website includes a reliable, multi-channel enquiry system:
+The **Start Project** section uses **EmailJS** exclusively for direct in-browser form submission to your inbox (without opening external mail apps or WhatsApp).
 
-1. **Default Mail Client (`mailto:`):**  
-   Clicking "Submit Enquiry" formats an email to `apexora.technology@gmail.com` with customer name, phone number, selected service, and project description.
-
-2. **Web Fallbacks (Gmail Web & WhatsApp):**  
-   If the customer does not have a desktop mail application configured, buttons immediately appear to:
-   - **Open in Gmail Web:** Directly launches `mail.google.com` with recipient, subject, and message pre-filled.
-   - **Send on WhatsApp:** Opens WhatsApp Web or mobile app with a formatted project briefing message to `+91 90031 67331`.
-
-3. **Optional EmailJS Direct Delivery:**  
-   If you want form submissions delivered directly to your inbox without opening an external client:
-   1. Sign up for free at [EmailJS](https://www.emailjs.com/).
-   2. Create an Email Service (Gmail) and an Email Template.
-   3. Open `index.html` and update lines 92–98:
-      ```javascript
-      window.EMAILJS_CONFIG = {
-        serviceId: 'service_xxxxxxx',
-        templateId: 'template_xxxxxxx',
-        publicKey: 'YOUR_PUBLIC_KEY'
-      };
-      ```
-   The website will automatically deliver submissions via EmailJS!
+### How to Activate EmailJS (in 2 minutes):
+1. Create a free account at [EmailJS](https://www.emailjs.com/).
+2. In the EmailJS dashboard:
+   - **Email Services:** Add your Gmail (`apexora.technology@gmail.com`) and copy the **Service ID** (e.g., `service_xxxxxxx`).
+   - **Email Templates:** Create a new template and copy the **Template ID** (e.g., `template_xxxxxxx`).
+     - Recommended template fields: `{{from_name}}`, `{{from_email}}`, `{{phone}}`, `{{service}}`, `{{message}}`.
+   - **Account / API Keys:** Copy your **Public Key** (e.g., `user_xxxxxxxxxxxx`).
+3. Add your keys either in `index.html` (lines 94–98) or in `js/app.js` (`CONFIG.emailjs`):
+   ```javascript
+   window.EMAILJS_CONFIG = {
+     serviceId: 'your_service_id',
+     templateId: 'your_template_id',
+     publicKey: 'your_public_key'
+   };
+   ```
+4. Now, whenever a visitor clicks "Submit Enquiry", their message is delivered directly to your inbox with instant on-screen confirmation!
 
 ---
 
@@ -227,3 +221,4 @@ The website features an authentic review system:
 ---
 
 © 2026 APEXORA.TECH. All rights reserved.
+

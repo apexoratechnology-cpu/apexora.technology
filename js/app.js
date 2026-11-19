@@ -78,7 +78,18 @@ const A={
  "videoP": "assets/intro-portrait.mp4"
 };
 /* ===== EDITABLE COMPANY DATA ===== */
-const CONFIG={email:'apexora.technology@gmail.com',phones:['90031 67331','63744 89818'],instagram:'apexora.tech2k',location:'Chennai, Tamil Nadu',mapUrl:'https://www.google.com/maps/search/?api=1&query=Chennai%2C+Tamil+Nadu'};
+const CONFIG={
+email:'apexora.technology@gmail.com',
+phones:['90031 67331','63744 89818'],
+instagram:'apexora.tech2k',
+location:'Chennai, Tamil Nadu',
+mapUrl:'https://www.google.com/maps/search/?api=1&query=Chennai%2C+Tamil+Nadu',
+emailjs:{
+serviceId:'',  // e.g. 'service_xxxxxxx'
+templateId:'', // e.g. 'template_xxxxxxx'
+publicKey:''   // e.g. 'user_xxxxxxxxxxxx'
+}
+};
 const OFFICIALS=[ /* order = display order. g:'m' = first row, g:'f' = second row */
 {g:'m',name:'R.Rajesh',role:'Founder & CEO',degree:'Artificial Intelligence and Data Science',instagram:'apex.rougee',email:'r.rajeshkumar.1320@gmail.com',bio:'Founder & CEO'},
 {g:'m',name:'M.Wilson Christhu Doss',role:'Co-Founder',degree:'Artificial Intelligence and Data Science',instagram:'wilsonwill6915',email:'willsziontech@gmail.com',bio:'Co-Founder'},
@@ -326,34 +337,43 @@ open('Start your project',`<form id="ef" novalidate>
 <label>Service Required<select name="service" required><option value="">Select a service</option>${opts}</select><span class="err"></span></label>
 <label>Project Description<textarea name="desc" rows="4" placeholder="Tell us what you want to build or design..." required>${esc(prefillDesc)}</textarea><span class="err"></span></label>
 <button class="btn" type="submit">Submit Enquiry</button><div id="fm" role="status"></div></form>`);
-$('#ef').onsubmit=e=>{e.preventDefault();const f=e.target,v=n=>f[n].value.trim(),R={name:v('name').length>=2,email:/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('email')),phone:/^\+?[\d\s-]{7,16}$/.test(v('phone')),service:!!v('service'),desc:v('desc').length>=10};
+$('#ef').onsubmit=async e=>{e.preventDefault();const f=e.target,v=n=>f[n].value.trim(),R={name:v('name').length>=2,email:/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('email')),phone:/^\+?[\d\s-]{7,16}$/.test(v('phone')),service:!!v('service'),desc:v('desc').length>=10};
 const M={name:'Enter your full name.',email:'Enter a valid email address.',phone:'Enter a valid phone number.',service:'Choose a service.',desc:'Describe your project in at least 10 characters.'};
 let ok=true;for(const k in R){f[k].nextElementSibling.textContent=R[k]?'':M[k];if(!R[k]&&ok){f[k].focus();ok=false}}
-if(!ok)return;const fm=$('#fm');
-if(!C.email){fm.style.color='var(--ac2)';fm.textContent='Enquiries can’t be sent yet because the company email isn’t set up. Please contact us directly.';return}
-const subject='Project enquiry: '+v('service');
-const bodyText=`Name: ${v('name')}\nEmail: ${v('email')}\nPhone: ${v('phone')}\nService: ${v('service')}\n\nProject Description:\n${v('desc')}`;
-const mailtoUrl=`mailto:${C.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
-const gmailUrl=`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(C.email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
-const waPhone=(C.phones[0]||'9003167331').replace(/\D/g,'');
-const waUrl=`https://api.whatsapp.com/send?phone=91${waPhone}&text=${encodeURIComponent('Hello APEXORA.TECH,\n\nI want to start a project:\n\n'+bodyText)}`;
-
-try{location.href=mailtoUrl}catch(err){}
-
-if(window.emailjs&&window.EMAILJS_CONFIG&&window.EMAILJS_CONFIG.publicKey&&window.EMAILJS_CONFIG.serviceId){
-  window.emailjs.send(window.EMAILJS_CONFIG.serviceId,window.EMAILJS_CONFIG.templateId,{
-    from_name:v('name'),from_email:v('email'),phone:v('phone'),service:v('service'),message:v('desc')
-  }).catch(()=>{});
+if(!ok)return;const fm=$('#fm'),btn=f.querySelector('button[type="submit"]');
+const ecf=(window.EMAILJS_CONFIG&&window.EMAILJS_CONFIG.publicKey)?window.EMAILJS_CONFIG:(CONFIG.emailjs||{});
+if(!ecf.serviceId||!ecf.templateId||!ecf.publicKey){
+fm.style.color='var(--ac2)';
+fm.innerHTML='<div style="margin-top:12px;padding:12px;border:1px solid var(--ac2);border-radius:10px;background:rgba(214,0,25,0.06);font-size:13px;line-height:1.5"><b>EmailJS is not configured yet.</b><br>Please set your <code>serviceId</code>, <code>templateId</code>, and <code>publicKey</code> in <code>js/app.js</code> or <code>index.html</code> to receive submissions.</div>';
+return;
 }
-
-fm.innerHTML=`<div style="margin-top:14px;padding:12px;background:var(--bg);border:1px solid var(--bd);border-radius:10px;text-align:left">
-<p style="margin:0 0 8px;font-size:13px;color:var(--ac);font-weight:600">✓ Enquiry prepared! Choose how to send:</p>
-<div style="display:flex;gap:8px;flex-wrap:wrap">
-<a class="btn" href="${mailtoUrl}" style="padding:6px 12px;font-size:12px">Default Mail App</a>
-<a class="btn ghost" href="${gmailUrl}" target="_blank" rel="noopener" style="padding:6px 12px;font-size:12px">Open in Gmail Web</a>
-<a class="btn ghost" href="${waUrl}" target="_blank" rel="noopener" style="padding:6px 12px;font-size:12px;color:#25d366;border-color:#25d366">Send on WhatsApp</a>
-</div>
-</div>`;
+if(!window.emailjs){
+fm.style.color='var(--ac2)';
+fm.textContent='EmailJS SDK could not be loaded. Please check your internet connection.';
+return;
+}
+btn.disabled=true;const origText=btn.textContent;btn.textContent='Sending Enquiry...';
+fm.style.color='var(--tx2)';fm.textContent='Sending your enquiry directly to APEXORA.TECH...';
+try{
+await emailjs.send(ecf.serviceId,ecf.templateId,{
+from_name:v('name'),
+from_email:v('email'),
+reply_to:v('email'),
+phone:v('phone'),
+service:v('service'),
+message:v('desc'),
+to_email:CONFIG.email||'apexora.technology@gmail.com',
+to_name:'APEXORA.TECH'
+},ecf.publicKey);
+fm.style.color='#10b981';
+fm.innerHTML=`<div style="margin-top:14px;padding:14px;border:1px solid #10b981;border-radius:10px;background:rgba(16,185,129,0.08);text-align:left"><b style="color:#10b981;font-size:15px;display:block;margin-bottom:4px">✓ Enquiry Sent Successfully!</b><span style="font-size:13px;color:var(--tx)">Thank you, <b>${esc(v('name'))}</b>. We have received your project enquiry for <b>${esc(v('service'))}</b> and will contact you shortly.</span></div>`;
+f.reset();btn.textContent='Enquiry Sent';
+}catch(err){
+console.error('EmailJS error:',err);
+fm.style.color='var(--ac2)';
+fm.innerHTML=`<div style="margin-top:12px;padding:12px;border:1px solid var(--ac2);border-radius:10px;background:rgba(214,0,25,0.06);font-size:13px"><b>Failed to send enquiry.</b> ${esc(err?.text||err?.message||'Please check your EmailJS settings or try again.')}</div>`;
+btn.disabled=false;btn.textContent=origText;
+}
 }}
 function bindEnq(r=document){$$('[data-enq]',r).forEach(a=>a.onclick=e=>{e.preventDefault();mm.classList.remove('open');const svc=a.dataset.service||'';const desc=a.dataset.desc||'';enquiry(svc,desc)})}
 bindEnq();
